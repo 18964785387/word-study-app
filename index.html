@@ -1,0 +1,517 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>单词学习</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial}
+body{background:#f7f8fa;color:#333}
+/* 登录页面样式 */
+.login-container{position:fixed;top:0;left:0;right:0;bottom:0;background:#f7f8fa;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999}
+.login-box{background:white;border-radius:12px;padding:30px 25px;width:90%;max-width:400px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.login-title{font-size:22px;font-weight:600;text-align:center;margin-bottom:30px;color:#1677ff}
+.form-item{margin-bottom:20px}
+.form-item label{display:block;font-size:14px;color:#666;margin-bottom:8px}
+.form-item input{width:100%;padding:12px 15px;border:1px solid #e8e8e8;border-radius:8px;font-size:16px;outline:none}
+.form-item input:focus{border-color:#1677ff}
+.login-btn{width:100%;padding:14px;border-radius:8px;border:none;background:#1677ff;color:white;font-size:16px;cursor:pointer;margin-top:10px}
+.test-account{text-align:center;font-size:13px;color:#666;margin-top:15px}
+
+/* 主页面样式 */
+.header{position:fixed;top:0;left:0;right:0;height:50px;background:#1677ff;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;z-index:10}
+.container{margin:60px 15px 100px;display:none}
+/* 单词卡片 */
+.word-card{background:white;border-radius:12px;padding:30px 20px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:20px}
+.word{font-size:32px;font-weight:bold;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px}
+.sound-btn{width:30px;height:30px;border-radius:50%;border:1px solid #1677ff;color:#1677ff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px}
+.pho{color:#666;margin-bottom:20px}
+.meaning{font-size:18px;display:none;margin-top:20px;color:#1677ff}
+.btn-group{display:flex;gap:12px;margin-top:20px}
+.btn{flex:1;padding:14px;border-radius:8px;border:none;font-size:16px;cursor:pointer}
+.btn-show{background:#1677ff;color:white}
+.btn-know{background:#52c41a;color:white}
+.btn-unknown{background:#ff4d4f;color:white}
+.btn-collect{background:#faad14;color:white}
+.progress{margin:15px 0;font-size:14px;color:#666;display:flex;justify-content:space-between}
+
+/* 底部导航栏 */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;height:60px;background:white;border-top:1px solid #e8e8e8;display:flex;align-items:center;justify-content:space-around;padding:0 10px;z-index:10}
+.bottom-bar .item{font-size:12px;color:#666;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer}
+.bottom-bar .item.active{color:#1677ff}
+.item-icon{font-size:20px}
+
+/* 错词本页面 */
+.wrong-word-page{display:none;margin:60px 15px 100px}
+.page-title{font-size:20px;font-weight:500;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid #e8e8e8}
+.wrong-word-list{display:flex;flex-direction:column;gap:15px}
+.wrong-word-item{background:white;border-radius:8px;padding:15px;box-shadow:0 2px 8px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:8px}
+.wrong-word-item .word{font-size:20px;margin-bottom:0}
+.wrong-word-item .pho{margin-bottom:0}
+.wrong-word-item .meaning{display:block;margin-top:5px}
+.clear-wrong-btn{width:100%;padding:12px;border-radius:8px;border:1px solid #ff4d4f;color:#ff4d4f;background:transparent;font-size:15px;cursor:pointer;margin-top:20px}
+
+/* 词库导入页面 */
+.import-page{display:none;margin:60px 15px 100px}
+.import-tips{font-size:14px;color:#666;margin-bottom:20px;line-height:1.6}
+.import-tips span{color:#ff4d4f;font-weight:500}
+.file-upload{margin-bottom:20px}
+.upload-btn{padding:12px 20px;border-radius:8px;border:1px solid #1677ff;color:#1677ff;background:transparent;font-size:15px;cursor:pointer;margin-right:15px}
+.import-btn{padding:12px 20px;border-radius:8px;border:none;background:#1677ff;color:white;font-size:15px;cursor:pointer}
+#fileInput{display:none}
+.import-result{margin-top:20px;font-size:14px;color:#52c41a;display:none}
+
+/* 我的页面 */
+.mine-page{display:none;margin:60px 15px 100px}
+.user-info{background:white;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.05);text-align:center}
+.user-avatar{width:80px;height:80px;border-radius:50%;background:#e8e8e8;margin:0 auto 15px;display:flex;align-items:center;justify-content:center;font-size:30px;color:#1677ff}
+.user-name{font-size:18px;font-weight:500;margin-bottom:5px}
+.logout-btn{padding:10px 20px;border-radius:8px;border:1px solid #ff4d4f;color:#ff4d4f;background:transparent;font-size:15px;cursor:pointer;margin-top:10px}
+.mine-item{background:white;border-radius:8px;padding:15px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.mine-item span:last-child{color:#999}
+
+/* 隐藏页面默认状态 */
+.page{display:none}
+.page.active{display:block}
+</style>
+</head>
+<body>
+
+<!-- 登录页面 -->
+<div class="login-container" id="loginContainer">
+  <div class="login-box">
+    <div class="login-title">单词学习</div>
+    <div class="form-item">
+      <label for="username">用户名</label>
+      <input type="text" id="username" placeholder="请输入用户名" value="test">
+    </div>
+    <div class="form-item">
+      <label for="password">密码</label>
+      <input type="password" id="password" placeholder="请输入密码" value="123456">
+    </div>
+    <button class="login-btn" id="loginBtn">登录</button>
+    <div class="test-account">测试账号：test 密码：123456</div>
+  </div>
+</div>
+
+<!-- 主页面头部 -->
+<div class="header" id="header" style="display:none">单词学习</div>
+
+<!-- 背单词主页面 -->
+<div class="container page active" id="wordPage">
+  <div class="progress">
+    <span>当前进度：<span id="index">1</span>/<span id="total">20</span></span>
+    <span>错词数：<span id="wrongCount">0</span></span>
+  </div>
+  <div class="word-card">
+    <div class="word" id="word">
+      abandon
+      <div class="sound-btn" id="soundBtn">🔊</div>
+    </div>
+    <div class="pho" id="pho">/əˈbændən/</div>
+    <button class="btn btn-show" id="showBtn">显示释义</button>
+    <div class="meaning" id="meaning">v. 放弃，抛弃，离弃</div>
+    <div class="btn-group" style="display:none" id="operate">
+      <button class="btn btn-collect" id="collectBtn">加入错词本</button>
+      <button class="btn btn-know" id="knowBtn">认识</button>
+      <button class="btn btn-unknown" id="unknownBtn">不认识</button>
+    </div>
+  </div>
+</div>
+
+<!-- 错词本页面 -->
+<div class="wrong-word-page page" id="wrongWordPage">
+  <div class="page-title">我的错词本</div>
+  <div class="wrong-word-list" id="wrongWordList">
+    <!-- 错词会动态添加到这里 -->
+  </div>
+  <button class="clear-wrong-btn" id="clearWrongBtn">清空错词本</button>
+</div>
+
+<!-- 词库导入页面 -->
+<div class="import-page page" id="importPage">
+  <div class="page-title">词库导入</div>
+  <div class="import-tips">
+    支持TXT词库导入，格式要求：<span>单词 音标 释义</span>（空格分隔，一行一个单词）<br>
+    示例：abandon /əˈbændən/ v. 放弃，抛弃，离弃
+  </div>
+  <div class="file-upload">
+    <label for="fileInput" class="upload-btn">选择文件</label>
+    <input type="file" id="fileInput" accept=".txt">
+    <button class="import-btn" id="importBtn">导入词库</button>
+  </div>
+  <div class="import-result" id="importResult">导入成功！共导入X个单词</div>
+</div>
+
+<!-- 我的页面 -->
+<div class="mine-page page" id="minePage">
+  <div class="page-title">我的</div>
+  <div class="user-info">
+    <div class="user-avatar">👤</div>
+    <div class="user-name" id="userName">test</div>
+    <button class="logout-btn" id="logoutBtn">退出登录</button>
+  </div>
+  <div class="mine-item">
+    <span>背词统计</span>
+    <span id="reciteCount">0个</span>
+  </div>
+  <div class="mine-item">
+    <span>错词本</span>
+    <span id="mineWrongCount">0个</span>
+  </div>
+  <div class="mine-item">
+    <span>词库管理</span>
+    <span>＞</span>
+  </div>
+</div>
+
+<!-- 底部导航栏 -->
+<div class="bottom-bar" id="bottomBar" style="display:none">
+  <div class="item active" data-page="wordPage">
+    <div class="item-icon">📚</div>
+    <div>背单词</div>
+  </div>
+  <div class="item" data-page="wrongWordPage">
+    <div class="item-icon">❌</div>
+    <div>错词本</div>
+  </div>
+  <div class="item" data-page="importPage">
+    <div class="item-icon">📤</div>
+    <div>词库导入</div>
+  </div>
+  <div class="item" data-page="minePage">
+    <div class="item-icon">👤</div>
+    <div>我的</div>
+  </div>
+</div>
+
+<script>
+// 核心数据（本地存储，登录后关联用户）
+let userInfo = {username: '', password: ''};
+let words = [
+  {w:"abandon",p:"/əˈbændən/",m:"v. 放弃，抛弃，离弃"},
+  {w:"ability",p:"/əˈbɪləti/",m:"n. 能力，才能"},
+  {w:"absent",p:"/ˈæbsənt/",m:"adj. 缺席的，不在场的"},
+  {w:"accept",p:"/əkˈsept/",m:"v. 接受，同意"},
+  {w:"accident",p:"/ˈæksɪdənt/",m:"n. 事故，意外"},
+  {w:"achieve",p:"/əˈtʃiːv/",m:"v. 实现，达到"},
+  {w:"across",p:"/əˈkrɒs/",m:"prep. 穿过，横过"},
+  {w:"action",p:"/ˈækʃn/",m:"n. 行动，动作"},
+  {w:"active",p:"/ˈæktɪv/",m:"adj. 积极的，活跃的"},
+  {w:"actual",p:"/ˈæktʃuəl/",m:"adj. 实际的，真实的"},
+  {w:"adapt",p:"/əˈdæpt/",m:"v. 适应，改编"},
+  {w:"add",p:"/æd/",m:"v. 添加，增加"},
+  {w:"admire",p:"/ədˈmaɪə(r)/",m:"v. 钦佩，羡慕"},
+  {w:"admit",p:"/ədˈmɪt/",m:"v. 承认，准许进入"},
+  {w:"adult",p:"/ˈædʌlt/",m:"n. 成年人"},
+  {w:"advance",p:"/ədˈvɑːns/",m:"v. 前进，进展"},
+  {w:"advantage",p:"/ədˈvɑːntɪdʒ/",m:"n. 优势，有利条件"},
+  {w:"advice",p:"/ədˈvaɪs/",m:"n. 建议，忠告"},
+  {w:"affect",p:"/əˈfekt/",m:"v. 影响，使感动"},
+  {w:"afraid",p:"/əˈfreɪd/",m:"adj. 害怕的，担心"}
+];
+let wrongWords = []; // 错词本
+let idx = 0; // 当前背词索引
+let reciteCount = 0; // 累计背词数
+
+// DOM元素获取
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+// 本地存储工具函数（关联用户，避免多用户数据混淆）
+function saveData() {
+  const data = {
+    words: words,
+    wrongWords: wrongWords,
+    idx: idx,
+    reciteCount: reciteCount
+  };
+  localStorage.setItem(`wordData_${userInfo.username}`, JSON.stringify(data));
+}
+
+function loadData() {
+  const data = localStorage.getItem(`wordData_${userInfo.username}`);
+  if (data) {
+    const parsedData = JSON.parse(data);
+    words = parsedData.words || words;
+    wrongWords = parsedData.wrongWords || [];
+    idx = parsedData.idx || 0;
+    reciteCount = parsedData.reciteCount || 0;
+  }
+}
+
+// 1. 登录功能
+$("#loginBtn").onclick = () => {
+  const username = $("#username").value.trim();
+  const password = $("#password").value.trim();
+  if (!username || !password) {
+    alert("请输入用户名和密码");
+    return;
+  }
+  // 模拟登录（实际项目可对接后端，此处本地存储用户信息）
+  userInfo = { username, password };
+  localStorage.setItem('currentUser', JSON.stringify(userInfo));
+  // 加载该用户的背词数据
+  loadData();
+  // 切换到主页面
+  $("#loginContainer").style.display = "none";
+  $("#header").style.display = "flex";
+  $("#bottomBar").style.display = "flex";
+  $("#container").style.display = "block";
+  // 初始化页面
+  loadWord();
+  updateWrongWordList();
+  updateMineInfo();
+};
+
+// 2. 退出登录功能
+$("#logoutBtn").onclick = () => {
+  // 保存当前用户数据
+  saveData();
+  // 清除当前用户信息
+  localStorage.removeItem('currentUser');
+  userInfo = { username: '', password: '' };
+  // 切换到登录页面
+  $("#loginContainer").style.display = "flex";
+  $("#header").style.display = "none";
+  $("#bottomBar").style.display = "none";
+  // 重置输入框
+  $("#username").value = "test";
+  $("#password").value = "123456";
+};
+
+// 3. 底部导航切换页面
+$$(".bottom-bar .item").forEach(item => {
+  item.onclick = () => {
+    // 切换导航激活状态
+    $$(".bottom-bar .item").forEach(i => i.classList.remove("active"));
+    item.classList.add("active");
+    // 切换页面显示
+    const pageId = item.getAttribute("data-page");
+    $$(".page").forEach(page => page.classList.remove("active"));
+    $(`#${pageId}`).classList.add("active");
+    // 错词本页面刷新
+    if (pageId === "wrongWordPage") {
+      updateWrongWordList();
+    }
+    // 我的页面刷新
+    if (pageId === "minePage") {
+      updateMineInfo();
+    }
+  };
+});
+
+// 4. 单词加载功能
+function loadWord() {
+  if (words.length === 0) {
+    alert("词库为空，请先导入词库！");
+    return;
+  }
+  const o = words[idx];
+  $("#word").firstChild.textContent = o.w;
+  $("#pho").textContent = o.p;
+  $("#meaning").textContent = o.m;
+  $("#meaning").style.display = "none";
+  $("#showBtn").style.display = "block";
+  $("#operate").style.display = "none";
+  $("#index").textContent = idx + 1;
+  $("#total").textContent = words.length;
+  $("#wrongCount").textContent = wrongWords.length;
+}
+
+// 5. 显示释义
+$("#showBtn").onclick = () => {
+  $("#meaning").style.display = "block";
+  $("#showBtn").style.display = "none";
+  $("#operate").style.display = "flex";
+};
+
+// 6. 发音朗读功能（使用浏览器原生语音合成）
+$("#soundBtn").onclick = () => {
+  const word = $("#word").firstChild.textContent.trim();
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = 'en-US'; // 英文发音
+    speechSynthesis.speak(utterance);
+  } else {
+    alert("您的浏览器不支持发音功能，请更换浏览器重试！");
+  }
+};
+
+// 7. 加入错词本
+$("#collectBtn").onclick = () => {
+  const currentWord = words[idx];
+  // 避免重复添加
+  const isExist = wrongWords.some(word => word.w === currentWord.w);
+  if (!isExist) {
+    wrongWords.push(currentWord);
+    alert("已加入错词本！");
+    // 保存数据
+    saveData();
+    // 更新错词数显示
+    $("#wrongCount").textContent = wrongWords.length;
+  } else {
+    alert("该单词已在错词本中！");
+  }
+};
+
+// 8. 认识/不认识按钮（切换下一个单词）
+$("#knowBtn").onclick = nextWord;
+$("#unknownBtn").onclick = () => {
+  // 不认识自动加入错词本
+  const currentWord = words[idx];
+  const isExist = wrongWords.some(word => word.w === currentWord.w);
+  if (!isExist) {
+    wrongWords.push(currentWord);
+    saveData();
+    $("#wrongCount").textContent = wrongWords.length;
+  }
+  nextWord();
+};
+
+// 切换下一个单词
+function nextWord() {
+  reciteCount++;
+  idx++;
+  if (idx >= words.length) {
+    idx = 0;
+    alert("恭喜！本轮单词已背完，重新开始！");
+  }
+  loadWord();
+  saveData();
+  updateMineInfo();
+}
+
+// 9. 错词本更新与显示
+function updateWrongWordList() {
+  const wrongList = $("#wrongWordList");
+  wrongList.innerHTML = "";
+  if (wrongWords.length === 0) {
+    wrongList.innerHTML = '<div style="text-align:center;padding:20px;color:#666">暂无错词</div>';
+    return;
+  }
+  wrongWords.forEach((word, index) => {
+    const item = document.createElement("div");
+    item.className = "wrong-word-item";
+    item.innerHTML = `
+      <div class="word">${word.w} <div class="sound-btn" onclick="playSound('${word.w}')">🔊</div></div>
+      <div class="pho">${word.p}</div>
+      <div class="meaning">${word.m}</div>
+      <button class="btn btn-know" style="width:100%;margin-top:10px" onclick="removeWrongWord(${index})">移除错词</button>
+    `;
+    wrongList.appendChild(item);
+  });
+}
+
+// 错词发音（全局函数，供错词本调用）
+function playSound(word) {
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = 'en-US';
+    speechSynthesis.speak(utterance);
+  } else {
+    alert("您的浏览器不支持发音功能，请更换浏览器重试！");
+  }
+}
+
+// 移除错词（全局函数，供错词本调用）
+function removeWrongWord(index) {
+  wrongWords.splice(index, 1);
+  saveData();
+  updateWrongWordList();
+  $("#wrongCount").textContent = wrongWords.length;
+  updateMineInfo();
+}
+
+// 清空错词本
+$("#clearWrongBtn").onclick = () => {
+  if (confirm("确定要清空错词本吗？")) {
+    wrongWords = [];
+    saveData();
+    updateWrongWordList();
+    $("#wrongCount").textContent = 0;
+    updateMineInfo();
+  }
+};
+
+// 10. 词库导入功能
+$("#importBtn").onclick = () => {
+  const fileInput = $("#fileInput");
+  if (!fileInput.files || fileInput.files.length === 0) {
+    alert("请先选择TXT词库文件！");
+    return;
+  }
+  const file = fileInput.files[0];
+  if (file.type !== "text/plain" && !file.name.endsWith(".txt")) {
+    alert("请选择TXT格式的文件！");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const content = e.target.result;
+    const lines = content.split("\n").filter(line => line.trim() !== "");
+    const newWords = [];
+    lines.forEach(line => {
+      // 按空格分割（兼容多个空格）
+      const parts = line.trim().split(/\s+/);
+      if (parts.length >= 3) {
+        const w = parts[0];
+        const p = parts[1];
+        const m = parts.slice(2).join(" ");
+        newWords.push({ w, p, m });
+      }
+    });
+    if (newWords.length === 0) {
+      alert("导入失败，请检查词库格式是否正确！");
+      return;
+    }
+    // 合并词库（去重）
+    const existingWords = new Set(words.map(word => word.w));
+    newWords.forEach(word => {
+      if (!existingWords.has(word.w)) {
+        words.push(word);
+        existingWords.add(word.w);
+      }
+    });
+    // 保存数据
+    saveData();
+    // 刷新页面
+    loadWord();
+    // 显示导入结果
+    $("#importResult").textContent = `导入成功！共导入${newWords.length}个单词（去重后）`;
+    $("#importResult").style.display = "block";
+    // 重置文件输入
+    fileInput.value = "";
+    // 3秒后隐藏结果提示
+    setTimeout(() => {
+      $("#importResult").style.display = "none";
+    }, 3000);
+  };
+  reader.readAsText(file, "UTF-8");
+};
+
+// 11. 我的页面信息更新
+function updateMineInfo() {
+  $("#userName").textContent = userInfo.username;
+  $("#reciteCount").textContent = `${reciteCount}个`;
+  $("#mineWrongCount").textContent = `${wrongWords.length}个`;
+}
+
+// 页面初始化（判断是否有已登录用户）
+window.onload = () => {
+  const currentUser = localStorage.getItem('currentUser');
+  if (currentUser) {
+    userInfo = JSON.parse(currentUser);
+    loadData();
+    $("#loginContainer").style.display = "none";
+    $("#header").style.display = "flex";
+    $("#bottomBar").style.display = "flex";
+    loadWord();
+    updateWrongWordList();
+    updateMineInfo();
+  }
+};
+</script>
+
+</body>
+</html>
